@@ -1,13 +1,15 @@
-#ifndef PPOSITIONAL_ENCODING_HPP_
-#define PPOSITIONAL_ENCODING_HPP_
+#ifndef POSITIONAL_ENCODING_HPP_
+#define POSITIONAL_ENCODING_HPP_
 
 #include <cmath>
 #include <torch/torch.h>
 
 using namespace torch::indexing;
 
-class PositionalEncoding: torch::nn::Module {
-    PositionalEncoding(int64_t emb_size, double dropout, int64_t maxlen = 5000) {
+// helper Module that adds positional encoding to the token embedding to introduce a notion of word order.
+class PositionalEncodingImpl: torch::nn::Module {
+    public:
+    PositionalEncodingImpl(int64_t emb_size, double dropout, int64_t maxlen = 5000) {
         torch::Tensor den = at::exp(- torch::arange(0, emb_size, 2) * log(10000) / emb_size);
         torch::Tensor pos = torch::arange(0, maxlen).reshape({maxlen, 1});
         pos_embedding = torch::zeros({maxlen, emb_size});
@@ -22,8 +24,10 @@ class PositionalEncoding: torch::nn::Module {
         return this->dropout(token_embedding + pos_embedding.index({None, token_embedding.size(0), Slice(None, None)}));
     } 
 
-    torch::nn::Dropout dropout;
+    torch::nn::Dropout dropout = nullptr;
     torch::Tensor pos_embedding;
 };
 
-#endif  // PPOSITIONAL_ENCODING_HPP_
+TORCH_MODULE(PositionalEncoding);
+
+#endif  // POSITIONAL_ENCODING_HPP_

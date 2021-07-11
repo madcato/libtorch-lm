@@ -2,7 +2,9 @@
 #include <map>
 #include <string>
 #include <torch/torch.h>
-#include "positional_encoding.hpp"
+#include "include/positional_encoding.hpp"
+#include "include/token_embedding.hpp"
+#include "include/seq2seq_transformer.hpp"
 
 using namespace std;
 
