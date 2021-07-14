@@ -130,6 +130,12 @@ def collate_fn(batch):
     tgt_batch = pad_sequence(tgt_batch, padding_value=PAD_IDX)
     return src_batch, tgt_batch
 
+class Container(torch.nn.Module):
+    def __init__(self, my_values):
+        super().__init__()
+        for key in my_values:
+            setattr(self, key, my_values[key])
+
 BATCH_SIZE = 30000000
 
 from torch.utils.data import DataLoader
@@ -147,10 +153,23 @@ for src, tgt in train_dataloader:
     print("saving train files")
     torch.save(src, "../data/src.pt")
     torch.save(tgt, "../data/tgt.pt")
+    my_values = {
+        'src': src,
+        'tgt': tgt
+    }
+    container = torch.jit.script(Container(my_values))
+    container.save("../data/train.pt")
+
+    
+
 
 val_iter = Multi30k(split='valid', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
 val_dataloader = DataLoader(val_iter, batch_size=BATCH_SIZE, collate_fn=collate_fn)
 for test_src, test_tgt in val_dataloader:
     print("saving test files")
-    torch.save(test_src, "../data/test_src.pt")
-    torch.save(test_tgt, "../data/test_tgt.pt")
+    my_values = {
+        'src': test_src,
+        'tgt': test_tgt
+    }
+    container = torch.jit.script(Container(my_values))
+    container.save("../data/test.pt")
