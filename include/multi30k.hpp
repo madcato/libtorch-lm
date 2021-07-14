@@ -4,7 +4,7 @@
 #include <torch/torch.h>
 
 /// The MULTI30K dataset.
-class TORCH_API MULTI30K : public torch::data::Dataset<MULTI30K> {
+class TORCH_API MULTI30KImpl : public torch::data::Dataset<MULTI30KImpl> {
  public:
   /// The mode in which the dataset is loaded.
   enum class Mode { kTrain, kTest };
@@ -13,10 +13,13 @@ class TORCH_API MULTI30K : public torch::data::Dataset<MULTI30K> {
   ///
   /// The supplied `root` path should contain the *content* of the unzipped
   /// MNIST dataset, available from http://yann.lecun.com/exdb/mnist.
-  explicit MULTI30K(const std::string& root, Mode mode = Mode::kTrain);
+  explicit MULTI30KImpl(const std::string& root, Mode mode = Mode::kTrain);
 
   /// Returns the `Example` at the given `index`.
   torch::data::Example<> get(size_t index) override;
+
+  /// Returns the size of each sample.
+  size_t features() const;
 
   /// Returns the size of the dataset.
   c10::optional<size_t> size() const override;
@@ -33,6 +36,9 @@ class TORCH_API MULTI30K : public torch::data::Dataset<MULTI30K> {
 
  private:
   torch::Tensor sources_, targets_;
+  Mode mode;
 };
+
+TORCH_MODULE(MULTI30K);
 
 #endif  // MULTI30K_HPP_

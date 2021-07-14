@@ -1,4 +1,5 @@
 #include <torch/torch.h>
+#include <iostream>
 
 #include "../include/multi30k.hpp"
 
@@ -8,37 +9,10 @@ constexpr uint32_t kImageMagicNumber = 2051;
 constexpr uint32_t kTargetMagicNumber = 2049;
 constexpr uint32_t kImageRows = 28;
 constexpr uint32_t kImageColumns = 28;
-constexpr const char* kTrainImagesFilename = "train-images-idx3-ubyte";
-constexpr const char* kTrainTargetsFilename = "train-labels-idx1-ubyte";
-constexpr const char* kTestImagesFilename = "t10k-images-idx3-ubyte";
-constexpr const char* kTestTargetsFilename = "t10k-labels-idx1-ubyte";
-
-bool check_is_little_endian() {
-  const uint32_t word = 1;
-  return reinterpret_cast<const uint8_t*>(&word)[0] == 1;
-}
-
-constexpr uint32_t flip_endianness(uint32_t value) {
-  return ((value & 0xffu) << 24u) | ((value & 0xff00u) << 8u) |
-      ((value & 0xff0000u) >> 8u) | ((value & 0xff000000u) >> 24u);
-}
-
-uint32_t read_int32(std::ifstream& stream) {
-  static const bool is_little_endian = check_is_little_endian();
-  // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
-  uint32_t value;
-  AT_ASSERT(stream.read(reinterpret_cast<char*>(&value), sizeof value));
-  return is_little_endian ? flip_endianness(value) : value;
-}
-
-uint32_t expect_int32(std::ifstream& stream, uint32_t expected) {
-  const auto value = read_int32(stream);
-  // clang-format off
-  TORCH_CHECK(value == expected,
-      "Expected to read number ", expected, " but found ", value, " instead");
-  // clang-format on
-  return value;
-}
+constexpr const char* kTrainSourceFilename = "src.pt";
+constexpr const char* kTrainTargetFilename = "tgt.pt";
+constexpr const char* kTestSpurceFilename = "test_src.pt";
+constexpr const char* kTestTargetFilename = "test_tgtcd.pt";
 
 std::string join_paths(std::string head, const std::string& tail) {
   if (head.back() != '/') {
@@ -48,63 +22,76 @@ std::string join_paths(std::string head, const std::string& tail) {
   return head;
 }
 
-torch::Tensor read_images(const std::string& root, bool train) {
+torch::Tensor readFile(const std::string& filename)
+{
+    // open the file:
+    std::ifstream file(filename, std::ios::binary);
+    TORCH_CHECK(file, "Error opening images file at ", filename);
+
+    // Stop eating new lines in binary mode!!!
+    file.unsetf(std::ios::skipws);
+
+    // get its size:
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    // reserve capacity
+    std::vector<char> vec;
+    vec.reserve(fileSize);
+
+    // read the data:
+    vec.insert(vec.begin(),
+               std::istream_iterator<char>(file),
+               std::istream_iterator<char>());
+
+    torch::IValue x = torch::pickle_load(vec);
+    torch::Tensor tensor = x.toTensor();
+    return tensor;
+}
+
+torch::Tensor read_sources(const std::string& root, bool train) {
   const auto path =
-      join_paths(root, train ? kTrainImagesFilename : kTestImagesFilename);
-  std::ifstream images(path, std::ios::binary);
-  TORCH_CHECK(images, "Error opening images file at ", path);
-
-  const auto count = train ? kTrainSize : kTestSize;
-
-  // From http://yann.lecun.com/exdb/MULTI30K/
-  expect_int32(images, kImageMagicNumber);
-  expect_int32(images, count);
-  expect_int32(images, kImageRows);
-  expect_int32(images, kImageColumns);
-
-  auto tensor =
-      torch::empty({count, 1, kImageRows, kImageColumns}, torch::kByte);
-  images.read(reinterpret_cast<char*>(tensor.data_ptr()), tensor.numel());
-  return tensor.to(torch::kFloat32).div_(255);
+      join_paths(root, train ? kTrainSourceFilename : kTestSpurceFilename);
+  torch::Tensor tensor = readFile(path);
+  return tensor;
 }
 
 torch::Tensor read_targets(const std::string& root, bool train) {
   const auto path =
-      join_paths(root, train ? kTrainTargetsFilename : kTestTargetsFilename);
-  std::ifstream targets(path, std::ios::binary);
-  TORCH_CHECK(targets, "Error opening targets file at ", path);
-
-  const auto count = train ? kTrainSize : kTestSize;
-
-  expect_int32(targets, kTargetMagicNumber);
-  expect_int32(targets, count);
-
-  auto tensor = torch::empty(count, torch::kByte);
-  targets.read(reinterpret_cast<char*>(tensor.data_ptr()), count);
-  return tensor.to(torch::kInt64);
+      join_paths(root, train ? kTrainTargetFilename : kTestTargetFilename);
+  torch::Tensor tensor = readFile(path);
+  return tensor;
 }
 
-MULTI30K::MULTI30K(const std::string& root, Mode mode)
-    : sources_(read_images(root, mode == Mode::kTrain)),
-      targets_(read_targets(root, mode == Mode::kTrain)) {}
+MULTI30KImpl::MULTI30KImpl(const std::string& root, Mode mode)
+    : sources_(read_sources(root, mode == Mode::kTrain)),
+      targets_(read_targets(root, mode == Mode::kTrain)),
+      mode(mode) {}
 
-torch::data::Example<> MULTI30K::get(size_t index) {
+torch::data::Example<> MULTI30KImpl::get(size_t index) {
   return {sources_[index], targets_[index]};
 }
 
-c10::optional<size_t> MULTI30K::size() const {
+size_t MULTI30KImpl::features() const {
   return sources_.size(0);
 }
 
+c10::optional<size_t> MULTI30KImpl::size() const {
+  return sources_.size(1);
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool MULTI30K::is_train() const noexcept {
+bool MULTI30KImpl::is_train() const noexcept {
   return sources_.size(0) == kTrainSize;
 }
 
-const torch::Tensor& MULTI30K::sources() const {
+const torch::Tensor& MULTI30KImpl::sources() const {
   return sources_;
 }
 
-const torch::Tensor& MULTI30K::targets() const {
+const torch::Tensor& MULTI30KImpl::targets() const {
   return targets_;
 }

@@ -153,23 +153,10 @@ for src, tgt in train_dataloader:
     print("saving train files")
     torch.save(src, "../data/src.pt")
     torch.save(tgt, "../data/tgt.pt")
-    my_values = {
-        'src': src,
-        'tgt': tgt
-    }
-    container = torch.jit.script(Container(my_values))
-    container.save("../data/train.pt")
-
-    
-
 
 val_iter = Multi30k(split='valid', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
 val_dataloader = DataLoader(val_iter, batch_size=BATCH_SIZE, collate_fn=collate_fn)
 for test_src, test_tgt in val_dataloader:
     print("saving test files")
-    my_values = {
-        'src': test_src,
-        'tgt': test_tgt
-    }
-    container = torch.jit.script(Container(my_values))
-    container.save("../data/test.pt")
+    torch.save(src, "../data/test_src.pt")
+    torch.save(tgt, "../data/test_tgt.pt")
