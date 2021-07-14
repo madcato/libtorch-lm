@@ -8,8 +8,9 @@
 using namespace torch::indexing;
 
 // Seq2Seq Network
-class Seq2SeqTransfomerImpl: torch::nn::Module {
-    Seq2SeqTransfomerImpl(int64_t num_encoder_layers,
+class Seq2SeqTransformerImpl: public torch::nn::Module {
+    public:
+    Seq2SeqTransformerImpl(int64_t num_encoder_layers,
                       int64_t num_decoder_layers,
                       int64_t emb_size,
                       int64_t nhead,
@@ -52,6 +53,6 @@ class Seq2SeqTransfomerImpl: torch::nn::Module {
     PositionalEncoding positional_encoding = nullptr;
 };
 
-TORCH_MODULE(Seq2SeqTransfomer);
+TORCH_MODULE(Seq2SeqTransformer);
 
 #endif  // SEQ2SEQ_TRANSFORMER_HPP_
