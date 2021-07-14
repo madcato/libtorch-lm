@@ -17,6 +17,7 @@ include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 
 add_executable(libtorch-lm main.cpp
                            src/util.cpp
-                           src/transformer.cpp)
+                           src/transformer.cpp
+                           src/multi30k.cpp)
 target_link_libraries(libtorch-lm "${TORCH_LIBRARIES}")
 set_property(TARGET libtorch-lm PROPERTY CXX_STANDARD 14)

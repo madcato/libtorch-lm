@@ -6,6 +6,7 @@
 #include "include/positional_encoding.hpp"
 #include "include/token_embedding.hpp"
 #include "include/seq2seq_transformer.hpp"
+#include "include/multi30k.hpp"
 
 using namespace std;
 
@@ -79,12 +80,5 @@ int main() {
     std::cout << "Dim " << a << ": " << tensorb.size(a) << "\n";
   }
 
-  // torch::jit::script::Module container = torch::jit::load("../data/train.pt");
-
-  // // Load values by name
-  // torch::Tensor a = container.get_attribute("src").toTensor();
-  // std::cout << a.shape() << "\n";
-
-  // torch::Tensor b = container.get_attribute("tgt").toTensor();
-  // std::cout << b.shape() << "\n";
+  
 }
