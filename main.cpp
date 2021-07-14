@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <torch/torch.h>
+#include <torch/script.h>
 #include "include/positional_encoding.hpp"
 #include "include/token_embedding.hpp"
 #include "include/seq2seq_transformer.hpp"
@@ -39,4 +40,9 @@ int main() {
 
   torch::Tensor tensor = torch::rand({2, 3});
   std::cout << tensor << std::endl;
+
+  printf("Loading tensor");
+  std::vector<torch::Tensor> train;
+  torch::load(train, "./data/src.pt");
+  // torch::jit::script::Module module = torch::jit::load("./data/src.pt");
 }
