@@ -50,49 +50,6 @@ for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
 for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
   vocab_transform[ln].set_default_index(UNK_IDX)
 
-from torch.nn.utils.rnn import pad_sequence
-
-# helper function to club together sequential operations
-def sequential_transforms(*transforms):
-    def func(txt_input):
-        for transform in transforms:
-            txt_input = transform(txt_input)
-        return txt_input
-    return func
-
-# function to add BOS/EOS and create tensor for input sequence indices
-def tensor_transform(token_ids: List[int]):
-    return torch.cat((torch.tensor([BOS_IDX]),
-                      torch.tensor(token_ids),
-                      torch.tensor([EOS_IDX])))
-
-# src and tgt language text transforms to convert raw strings into tensors indices
-text_transform = {}
-for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
-    text_transform[ln] = sequential_transforms(token_transform[ln], #Tokenization
-                                               vocab_transform[ln], #Numericalization
-                                               tensor_transform) # Add BOS/EOS and create tensor
-
-
-# function to collate data samples into batch tesors
-def collate_fn(batch):
-    src_batch, tgt_batch = [], []
-    for src_sample, tgt_sample in batch:
-        src_batch.append(text_transform[SRC_LANGUAGE](src_sample.rstrip("\n")))
-        tgt_batch.append(text_transform[TGT_LANGUAGE](tgt_sample.rstrip("\n")))
-
-    src_batch = pad_sequence(src_batch, padding_value=PAD_IDX)
-    tgt_batch = pad_sequence(tgt_batch, padding_value=PAD_IDX)
-    return src_batch, tgt_batch
-
-train_iter = Multi30k(split='train', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
-
-# print(len(train_iter))
-# print(train_iter.pos)
-# print(type(next(train_iter)))
-# print(train_iter.__next__)
-# Format is a tuple ("src","tgt") with two strings
-
 # Collation
 
 from torch.nn.utils.rnn import pad_sequence
@@ -160,3 +117,9 @@ for test_src, test_tgt in val_dataloader:
     print("saving test files")
     torch.save(src, "../data/test_src.pt")
     torch.save(tgt, "../data/test_tgt.pt")
+
+SRC_VOCAB_SIZE = len(vocab_transform[SRC_LANGUAGE])
+TGT_VOCAB_SIZE = len(vocab_transform[TGT_LANGUAGE])
+
+print(SRC_VOCAB_SIZE)
+print(TGT_VOCAB_SIZE)

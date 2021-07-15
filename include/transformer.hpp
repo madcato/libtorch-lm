@@ -15,6 +15,6 @@ Seq2SeqTransformer create_transformer(torch::Device& device,
 
 torch::nn::CrossEntropyLoss create_loss();
 
-torch::optim::Adam create_optimizer(const std::vector<torch::optim::OptimizerParamGroup>& transformer_parameters);
+torch::optim::Adam create_optimizer(const std::vector<at::Tensor>& transformer_parameters);
 
 #endif  // TRANSFORMER_HPP_

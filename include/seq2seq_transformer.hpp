@@ -18,17 +18,17 @@ class Seq2SeqTransformerImpl: public torch::nn::Module {
                       int64_t tgt_vocab_size,
                       int64_t dim_feedforward = 512,
                       double dropout = 0.1) {
-        transformer = torch::nn::Transformer(torch::nn::TransformerOptions()
+        transformer = register_module("transformer", torch::nn::Transformer(torch::nn::TransformerOptions()
                         .d_model(emb_size)
                         .nhead(nhead)
                         .num_encoder_layers(num_encoder_layers)
                         .num_decoder_layers(num_decoder_layers)
                         .dim_feedforward(dim_feedforward)
-                        .dropout(dropout));
-        generator = torch::nn::Linear(torch::nn::LinearOptions(emb_size, tgt_vocab_size));
-        src_tok_emb = TokenEmbedding(src_vocab_size, emb_size);
-        tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size);
-        positional_encoding = PositionalEncoding(emb_size, dropout);
+                        .dropout(dropout)));
+        generator = register_module("generator", torch::nn::Linear(torch::nn::LinearOptions(emb_size, tgt_vocab_size)));
+        src_tok_emb = register_module("src_tok_emb", TokenEmbedding(src_vocab_size, emb_size));
+        tgt_tok_emb = register_module("tgt_tok_emb", TokenEmbedding(tgt_vocab_size, emb_size));
+        positional_encoding = register_module("positional_encoding", PositionalEncoding(emb_size, dropout));
     }
 
     torch::Tensor forward(torch::Tensor src,

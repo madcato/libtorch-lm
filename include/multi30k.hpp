@@ -4,7 +4,7 @@
 #include <torch/torch.h>
 
 /// The MULTI30K dataset.
-class TORCH_API MULTI30KImpl : public torch::data::Dataset<MULTI30KImpl> {
+class TORCH_API MULTI30KImpl : public torch::data::datasets::Dataset<MULTI30KImpl> {
  public:
   /// The mode in which the dataset is loaded.
   enum class Mode { kTrain, kTest };

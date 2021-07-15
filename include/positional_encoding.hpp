@@ -7,7 +7,7 @@
 using namespace torch::indexing;
 
 // helper Module that adds positional encoding to the token embedding to introduce a notion of word order.
-class PositionalEncodingImpl: torch::nn::Module {
+class PositionalEncodingImpl: public torch::nn::Module {
     public:
     PositionalEncodingImpl(int64_t emb_size, double dropout, int64_t maxlen = 5000) {
         torch::Tensor den = at::exp(- torch::arange(0, emb_size, 2) * log(10000) / emb_size);
@@ -16,7 +16,7 @@ class PositionalEncodingImpl: torch::nn::Module {
         pos_embedding.index_put_({Slice(None, None), Slice(0, None, 2)}, at::sin(pos * den));
         pos_embedding.index_put_({Slice(None, None), Slice(1, None, 2)}, at::cos(pos * den));
 
-        this->dropout = torch::nn::Dropout(torch::nn::DropoutOptions(dropout));
+        this->dropout = register_module("dropout", torch::nn::Dropout(torch::nn::DropoutOptions(dropout)));
         register_buffer("pos_embedding", pos_embedding);
     }
 

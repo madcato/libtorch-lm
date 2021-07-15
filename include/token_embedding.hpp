@@ -7,10 +7,10 @@
 using namespace torch::indexing;
 
 // helper Module to convert tensor of input indices into corresponding tensor of token embeddings
-class TokenEmbeddingImpl: torch::nn::Module {
+class TORCH_API TokenEmbeddingImpl: public torch::nn::Module {
     public:
     TokenEmbeddingImpl(int64_t vocab_size, int64_t emb_size) {
-        embedding = torch::nn::Embedding(torch::nn::EmbeddingOptions(vocab_size, emb_size));
+        embedding = register_module("embedding", torch::nn::Embedding(torch::nn::EmbeddingOptions(vocab_size, emb_size)));
         this->emb_size_square = sqrt(emb_size);
     }
 
