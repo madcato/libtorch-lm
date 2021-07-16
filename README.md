@@ -2,6 +2,10 @@
 
 This is a lenguaje model made in c++ with libtorch.
 
+This code is a partial adaptation of the PyTorch tutorial: [Language translation with nn.Transformer and torchtext](https://pytorch.org/tutorials/beginner/translation_transformer.html)
+
+Only mode, training and evaluation is translated to C++. Data downloading, preparation and inference is not ported.
+
 ## Requirments
 
 - CMake
