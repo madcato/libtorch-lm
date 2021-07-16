@@ -14,7 +14,7 @@ constexpr uint32_t kImageColumns = 28;
 constexpr const char* kTrainSourceFilename = "src.pt";
 constexpr const char* kTrainTargetFilename = "tgt.pt";
 constexpr const char* kTestSourceFilename = "test_src.pt";
-constexpr const char* kTestTargetFilename = "test_tgtcd.pt";
+constexpr const char* kTestTargetFilename = "test_tgt.pt";
 
 std::string join_paths(std::string head, const std::string& tail) {
   if (head.back() != '/') {

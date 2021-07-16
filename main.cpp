@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <string>
@@ -11,6 +12,10 @@
 #include "include/multi30k.hpp"
 
 using namespace std;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
 
 const string SOURCE_LANGUAGE = "de";
 const string TARGET_LANGUAGE = "en";
@@ -66,12 +71,17 @@ int main() {
 
   transformer->to(device);
 
-  const int NUM_EPOCHCS = 11;
+  const int NUM_EPOCHCS = 18;
 
   for(auto epoch = 1 ; epoch <= NUM_EPOCHCS ; epoch++) {
-    double train_loss = train_epoch(transformer, optimizer, device);
-    double val_loss = 0;  // evalutae(transformer)
-    printf("Epoch: %i, Train loss: %f, Val loss: %f", epoch, train_loss, val_loss);
+    auto t1 = high_resolution_clock::now();
+    double train_loss = train_epoch(transformer, optimizer, loss_fn, device);
+    auto t2 = high_resolution_clock::now();
+    auto ms_int = duration_cast<milliseconds>(t2 - t1);
+
+    double val_loss = evaluate(transformer, loss_fn, device);
+    printf("Epoch: %i, Train loss: %f, Val loss: %f Epoch time: %li\n", epoch, train_loss, val_loss, ms_int.count());
+    // torch::save(net, "net.pt");
   }
   
    // Create a multi-threaded data loader for the MNIST dataset.
