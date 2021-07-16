@@ -44,7 +44,15 @@ class Seq2SeqTransformerImpl: public torch::nn::Module {
         torch::Tensor outs = transformer(src_emb, tgt_emb, src_mask, tgt_mask, memory_mask, //at::empty({}),
                                          src_padding_mask, tgt_padding_mask, memmory_key_padding_mask);
         return generator(outs);
-    } 
+    }
+
+    torch::Tensor encode(torch::Tensor& src, torch::Tensor& src_mask) {
+        return transformer->encoder.forward(positional_encoding(src_tok_emb(src)), src_mask);
+    }
+
+    torch::Tensor decode(torch::Tensor& tgt, torch::Tensor& memory, torch::Tensor& tgt_mask) {
+        return transformer->decoder.forward(positional_encoding(tgt_tok_emb(tgt)), memory, tgt_mask);
+    }
 
     torch::nn::Transformer transformer = nullptr;
     torch::nn::Linear generator = nullptr;

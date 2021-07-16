@@ -71,7 +71,7 @@ int main() {
 
   transformer->to(device);
 
-  const int NUM_EPOCHCS = 18;
+  const int NUM_EPOCHCS = 36;
 
   for(auto epoch = 1 ; epoch <= NUM_EPOCHCS ; epoch++) {
     auto t1 = high_resolution_clock::now();
@@ -81,7 +81,11 @@ int main() {
 
     double val_loss = evaluate(transformer, loss_fn, device);
     printf("Epoch: %i, Train loss: %f, Val loss: %f Epoch time: %li\n", epoch, train_loss, val_loss, ms_int.count());
-    // torch::save(net, "net.pt");
+    std::stringstream stream;
+    stream << "./model/" << "net_" << epoch << ".pt";
+    std::string file_path = stream.str();
+    std::cout << "File name output model: " << file_path << std::endl;
+    torch::save(transformer, file_path);
   }
   
    // Create a multi-threaded data loader for the MNIST dataset.
