@@ -27,4 +27,5 @@ Clena with `rake clean`
 3. `python3 -m spacy download en_core_web_sm`
 4. `python3 multi30k.py`
    This command create two files on `./data` dir: `src.pt` and `tgt.pt` with the source and target data prepared for training. Also create `test_src.pt` and `test_tgt.pt` with the source and target data prepared for training.
-5. Execute training: `./build/libtorch-lm`
+5. Create directory `model`. pt files with the trained model will be saved here.
+6. Execute training: `./build/libtorch-lm`
