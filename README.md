@@ -18,7 +18,7 @@ Only mode, training and evaluation is translated to C++. Data downloading, prepa
 
 Build with `rake`
 
-Clena with `rake clean`
+Clean with `rake clean`
 
 ## Download and prepare data
 
