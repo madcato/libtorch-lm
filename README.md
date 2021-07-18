@@ -20,7 +20,7 @@ Build with `rake`
 
 Clena with `rake clean`
 
-## Downlaod and prepare data
+## Download and prepare data
 
 1. `cd prepare`
 2. `python3 -m spacy download de_core_news_sm`
