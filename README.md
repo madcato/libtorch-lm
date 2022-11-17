@@ -13,6 +13,7 @@ Only mode, training and evaluation is translated to C++. Data downloading, prepa
 - NVIDIA drivers
 - CUDA
 - cudnn
+- [Spacy](https://spacy.io/usage) 
 
 ## Build
 
